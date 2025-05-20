@@ -1,110 +1,150 @@
-    //declaraçao das variaveis globais
-    let desempenho = 0;
-    let tentativas = 0;
-    let acertos = 0;
-    let jogar = true;
+// Variáveis globais
+let desempenho = 0;
+let tentativas = 0;
+let acertos = 0;
+let jogar = true;
 
-    //captura os botoes pelos ids e adiciona um evento de clique
-    const btnReiniciar = document.getElementById('reiniciar');
-    const btnJogarNovamente = document.getElementById('joganovamente');
+// Elementos do DOM
+const btnReiniciar = document.getElementById('reiniciar');
+const btnJogarNovamente = document.getElementById('joganovamente');
+const efeitoDiv = document.getElementById('efeito');
+const efeitoImagem = document.getElementById('efeito-imagem');
 
-    //funçao que zera os valores das variáveis controladoras
-    function reiniciar() {
-      desempenho = 0;
-      tentativas = 0;
-      acertos = 0;
-      jogar = true;
-      jogarNovamente();
-      atualizaPlacar(0, 0);
-      //mostra o botao jogarnovamente alterando a classe css (className)
-      btnJogarNovamente.className = 'visivel';
-      //oculta o botao reiniciar alterando a classe css (className)
-      btnReiniciar.className = 'invisivel';
+// Função para exibir efeitos de bomba ou serpentinas
+function mostrarEfeito(tipo) {
+  // Forçar reinicialização da animação
+  efeitoImagem.style.animation = 'none';
+  efeitoImagem.offsetHeight; // Trigger reflow
+  efeitoImagem.style.animation = 'efeitoAnimacao 1s ease-in-out';
+
+  efeitoDiv.classList.remove('d-none');
+  if (tipo === 'bomba') {
+    efeitoImagem.src = 'https://pngtree.com/png-vector/20190115/ourmid/pngtree-explosion-burst-bomb-boom-bang-png-image_319239.jpg';
+    efeitoImagem.alt = 'Explosão de Bomba';
+  } else if (tipo === 'serpentinas') {
+    efeitoImagem.src = 'https://pngtree.com/png-vector/20190228/ourmid/pngtree-confetti-background-png-image_708752.jpg';
+    efeitoImagem.alt = 'Serpentinas';
+  }
+  // Esconder o efeito após a animação
+  setTimeout(() => {
+    efeitoDiv.classList.add('d-none');
+  }, 1000); // Duração da animação (1 segundo)
+}
+
+// Função para reiniciar o jogo completamente
+function reiniciar() {
+  desempenho = 0;
+  tentativas = 0;
+  acertos = 0;
+  jogar = true;
+  jogarNovamente();
+  atualizaPlacar(0, 0);
+  btnJogarNovamente.classList.remove('d-none');
+  btnReiniciar.classList.add('d-none');
+}
+
+// Função para jogar novamente (mantém o placar)
+function jogarNovamente() {
+  jogar = true;
+  
+  // Resetar as células
+  document.querySelectorAll('.card-cell').forEach(cell => {
+    cell.className = 'card card-cell inicial';
+    const img = cell.querySelector('img');
+    if (img) img.remove();
+    
+    // Mostrar o número novamente
+    const numberSpan = cell.querySelector('.card-number');
+    numberSpan.classList.remove('hidden-number');
+  });
+}
+
+// Atualiza o placar
+function atualizaPlacar(acertos, tentativas) {
+  desempenho = tentativas > 0 ? (acertos / tentativas) * 100 : 0;
+  document.getElementById("resposta").innerHTML = `
+    Placar - Acertos: <span class="text-success">${acertos}</span> | 
+    Tentativas: <span class="text-primary">${tentativas}</span> | 
+    Desempenho: <span class="fw-bold">${Math.round(desempenho)}%</span>
+  `;
+  
+  // Verificar desempenho para efeitos
+  if (tentativas >= 1) { // Só mostrar efeitos após pelo menos uma tentativa
+    if (Math.round(desempenho) === 0) {
+      mostrarEfeito('bomba');
+    } else if (Math.round(desempenho) === 100) {
+      mostrarEfeito('serpentinas');
     }
+  }
+}
 
-    //funçao jogar novamente
-    function jogarNovamente() {
-      jogar = true;//variável jogar volta a ser verdadeira
-      //armazenamos todas as div na variável divis (getElementsByTagName)
-      let divis = document.getElementsByTagName("div");
-      //percorremos todas as divs armazenadas
-      for (i = 0; i < divis.length; i++) {
-        //verificamos se sao as divs com ids 0 ou 1 ou 2
-        if (divis[i].id == 0 || divis[i].id == 1 || divis[i].id == 2) {
-          //alteramos a classe css das divs 0, 1 e 2 (className)
-          divis[i].className = "inicial";
-        }
-      }
+// Função chamada quando o jogador acerta
+function acertou(obj) {
+  obj.classList.remove('inicial');
+  obj.classList.add('acertou');
+  
+  // Esconder o número
+  const numberSpan = obj.querySelector('.card-number');
+  numberSpan.classList.add('hidden-number');
+  
+  const img = new Image();
+  img.id = "imagem";
+  img.src = "https://upload.wikimedia.org/wikipedia/commons/2/2e/Oxygen480-emotes-face-smile-big.svg";
+  img.alt = "Smile";
+  img.classList.add('img-fluid');
+  
+  const cardBody = obj.querySelector('.card-body');
+  cardBody.appendChild(img);
+}
 
-      //armazenamos a imagem do Smile na variável imagem (getElementById)
-      let imagem = document.getElementById("imagem");
-      //se a imagem nao for vazia (se ela existir)
-      if (imagem != "") {
-        //removemos a imagem do Smile
-        imagem.remove();
-      }
-    }
+// Função chamada quando o jogador erra
+function errou(obj) {
+  obj.classList.remove('inicial');
+  obj.classList.add('errou');
+  
+  // Esconder o número
+  const numberSpan = obj.querySelector('.card-number');
+  numberSpan.classList.add('hidden-number');
+  
+  const img = new Image();
+  img.id = "imagem";
+  img.src = "https://png.pngtree.com/png-vector/20221110/ourmid/pngtree-yellow-sad-emoji-design-with-big-glassy-eyes-png-image_6432751.png";
+  img.alt = "Sad Face";
+  img.classList.add('img-fluid');
+  
+  const cardBody = obj.querySelector('.card-body');
+  cardBody.appendChild(img);
+}
 
-    //funçao que atualiza o placar
-    function atualizaPlacar(acertos, tentativas) {
-      //calcula o desempenho em porcentagem
-      desempenho = (acertos / tentativas) * 100;
-      //escreve o placar com os valores atualizados (innerHTML)
-      document.getElementById("resposta").innerHTML = "Placar - Acertos: " + acertos + " Tentativas: " + tentativas + " Desempenho: " + Math.round(desempenho) + "%";
+// Função principal que verifica a jogada
+function verifica(obj) {
+  if (!jogar) {
+       alert('Clique em "Jogar novamente" para continuar');
+    return;
+  }
 
-    }
+  jogar = false;
+  tentativas++;
 
-    //funçao executada quando o jogador acertou
-    function acertou(obj) {
-      //altera a classe CSS da <div> escolhida pelo jogador (className)
-      obj.className = "acertou";
-      //Criar uma constante img que armazena um novo objeto imagem com largura de 100px
-      const img = new Image(100);
-      img.id = "imagem";
-      //altera o atributo src (source) da imagem criada
-      img.src = "https://upload.wikimedia.org/wikipedia/commons/2/2e/Oxygen480-emotes-face-smile-big.svg";
-      //adiciona a imagem criada na div (obj) escolhida pelo jogador (appendChild)
-      obj.appendChild(img);
-    }
+  if (tentativas === 1) {
+    btnJogarNovamente.classList.add('d-none');
+    btnReiniciar.classList.remove('d-none');
+  }
 
-    //Função que sorteia um número aleatório entre 0 e 2 e verifica se o jogador acertou
-    function verifica(obj) {
-      //se jogar é verdadeiro
-      if (jogar) {
-        //jogar passa a ser false
-        jogar = false;
-        //incrementa as tentativas
-        tentativas++;
-        //verifica se jogou 3 vezes
-        if (tentativas == 3) {
-          //oculta o botao joganovamente alterando a classe css (getElementById e className)
-          btnJogarNovamente.className = 'invisivel';
-          //mostra o botao reiniciar alterando a classe css (getElementById e className)
-          btnReiniciar.className = 'visivel';
-        }
-        //a variável sorteado recebe um valor inteiro (Math.floor) aleatório (Math.random)
-        let sorteado = Math.floor(Math.random() * 3);
-        //se o id da <div> escolhida pelo jogador for igual ao número sorteado
-        if (obj.id == sorteado) {
-          //chama a funçao acertou passando a div escolhida pelo jogador
-          acertou(obj);
-          //incrementa o contador de acertos
-          acertos++;
-        } else {//se errou a tentativa
-          //altera a classe da <div> escolhida pelo jogador para a classe errou
-          obj.className = "errou";
-          //armazena a div aonde Smile está escondido (getElementById)
-          const objSorteado = document.getElementById(sorteado);
-          //chama a funçao acertou para mostrar a div aonde está o Smile
-          acertou(objSorteado);
-        }
-        //chama a funçao que atualiza o placar
-        atualizaPlacar(acertos, tentativas);
-      } else {//se o jogador clicar em outra carta sem reiniciar o jogo, recebe um alerta
-        alert('Clique em "Jogar novamente"');
-      }
-    }
+  const sorteado = Math.floor(Math.random() * 6); // 6 cartas (0 a 5)
+  
+  if (obj.id == sorteado) {
+    acertou(obj);
+    acertos++;
+  } else {
+    errou(obj);
+    const objSorteado = document.getElementById(sorteado);
+    acertou(objSorteado);
+  }
 
-//adiciona eventos aos botões
+  atualizaPlacar(acertos, tentativas);
+}
+
+// Event listeners
 btnJogarNovamente.addEventListener('click', jogarNovamente);
 btnReiniciar.addEventListener('click', reiniciar);

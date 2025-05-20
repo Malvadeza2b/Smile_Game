@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Carta CSS - Rei de Espadas</title>
+  <style>
+    body {
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .carta {
+      width: 120px;
+      height: 180px;
+      background: white;
+      border: 2px solid #000;
+      border-radius: 12px;
+      position: relative;
+      font-family: 'Georgia', serif;
+      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .canto {
+      position: absolute;
+      font-size: 20px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    .canto.superior {
+      top: 8px;
+      left: 8px;
+    }
+
+    .canto.inferior {
+      bottom: 8px;
+      right: 8px;
+      transform: rotate(180deg);
+    }
+
+    .naipe {
+      font-size: 60px;
+      color: black;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Estilos de cores por naipe */
+    .vermelho {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="carta">
+    <div class="canto superior">
+      <div>K</div>
+      <div>♠</div>
+    </div>
+    <div class="canto inferior">
+      <div>K</div>
+      <div>♠</div>
+    </div>
+    <div class="naipe">♠</div>
+  </div>
+</body>
+
+</html>
