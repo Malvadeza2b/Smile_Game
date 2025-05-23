@@ -20,11 +20,11 @@ function mostrarEfeito(tipo) {
   efeitoDiv.classList.remove("d-none");
   if (tipo === "bomba") {
     efeitoImagem.src =
-      "https://pngtree.com/png-vector/20190115/ourmid/pngtree-explosion-burst-bomb-boom-bang-png-image_319239.jpg";
+      "image/explotion-explode.gif";
     efeitoImagem.alt = "Explosão de Bomba";
   } else if (tipo === "serpentinas") {
     efeitoImagem.src =
-      "https://pngtree.com/png-vector/20190228/ourmid/pngtree-confetti-background-png-image_708752.jpg";
+      "image/91bbe84aa20c485badf80c055c0dfe3c.gif";
     efeitoImagem.alt = "Serpentinas";
   }
   // Esconder o efeito após a animação
