@@ -2,77 +2,79 @@
   height: 150px;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-}
-
-.card-cell:hover {
-  transform: scale(1.03);
-}
-
-.inicial {
-  background-color: #f8f9fa;
   border: 4px solid #28a745 !important;
 }
 
-.acertou {
-  background-color: #d4edda !important;
-  border: 4px solid #ffc107 !important;
-  color: #155724;
-}
+.card-cell:hover { transform: scale(1.03); }
 
-.errou {
-  background-color: #f8d7da !important;
-  border: 4px solid #343a40 !important;
-  color: #721c24;
-}
+.inicial { background-color: #f8f9fa; }
+.acertou { background-color: #d4edda !important; border-color: #ffc107 !important; }
+.errou { background-color: #f8d7da !important; border-color: #343a40 !important; }
 
-#imagem {
+.card-img {
   max-width: 60px;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
 }
 
-.card-number {
-  position: relative;
-  z-index: 2;
-}
+.card-number { position: relative; }
+.hidden-number { visibility: hidden; }
 
-.hidden-number {
-  visibility: hidden;
-}
-
+/* Efeitos em tela cheia */
 #efeito {
-  z-index: 1000;
-  max-width: 300px;
-  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.7);
+  z-index: 9999;
+  pointer-events: none;
 }
 
 #efeito-imagem {
-  max-width: 100%;
-  animation: efeitoAnimacao 1s ease-in-out;
-  animation-fill-mode: forwards;
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  animation: effectAnimation 1s ease-in-out forwards;
 }
 
-@keyframes efeitoAnimacao {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.2); opacity: 1; }
+@keyframes effectAnimation {
+  0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0; }
+}
+
+/* Efeitos específicos para cada tipo */
+.confetti-effect {
+  animation: confettiAnimation 1s ease-in-out forwards;
+}
+
+.bomb-effect {
+  animation: bombAnimation 1s ease-in-out forwards;
+}
+
+@keyframes confettiAnimation {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes bombAnimation {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
   100% { transform: scale(1); opacity: 0; }
 }
 
 @media (max-width: 576px) {
-  .card-cell {
-    height: 120px;
-  }
-  #imagem {
-    max-width: 50px;
-  }
-  .card-number {
-    font-size: 2.5rem;
-  }
-  #efeito {
-    max-width: 200px;
+  .card-cell { height: 120px; }
+  .card-img { max-width: 50px; }
+  .card-number { font-size: 2.5rem; }
+  
+  #efeito-imagem {
+    width: 100%;
+    height: 100%;
   }
 }

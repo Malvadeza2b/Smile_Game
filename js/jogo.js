@@ -1,158 +1,142 @@
-// Variáveis globais
-let desempenho = 0;
-let tentativas = 0;
-let acertos = 0;
-let jogar = true;
+// Configuração do jogo
+const config = {
+  totalCards: 6,
+  images: {
+    smile:
+      "https://upload.wikimedia.org/wikipedia/commons/2/2e/Oxygen480-emotes-face-smile-big.svg",
+    sad: "https://png.pngtree.com/png-vector/20221110/ourmid/pngtree-yellow-sad-emoji-design-with-big-glassy-eyes-png-image_6432751.png",
+    bomb: "https://i.gifer.com/embedded/download/7UTj.gif", // GIF de explosão em tela cheia
+    confetti: "https://i.gifer.com/embedded/download/7scZ.gif", // GIF de confete em tela cheia
+  },
+};
+// Estado do jogo
+const state = {
+  score: 0,
+  attempts: 0,
+  hits: 0,
+  isPlaying: true,
+};
 
-// Elementos do DOM
-const btnReiniciar = document.getElementById("reiniciar");
-const btnJogarNovamente = document.getElementById("joganovamente");
-const efeitoDiv = document.getElementById("efeito");
-const efeitoImagem = document.getElementById("efeito-imagem");
+// Elementos DOM
+const elements = {
+  gameBoard: document.getElementById("game-board"),
+  btnRestart: document.getElementById("reiniciar"),
+  btnPlayAgain: document.getElementById("joganovamente"),
+  effect: document.getElementById("efeito"),
+  effectImg: document.getElementById("efeito-imagem"),
+  response: document.getElementById("resposta"),
+};
 
-// Função para exibir efeitos de bomba ou serpentinas
-function mostrarEfeito(tipo) {
-  // Forçar reinicialização da animação
-  efeitoImagem.style.animation = "none";
-  void efeitoImagem.offsetWidth; // Trigger reflow
-  efeitoImagem.style.animation = "efeitoAnimacao 1s ease-in-out";
-
-  efeitoDiv.classList.remove("d-none");
-  if (tipo === "bomba") {
-    efeitoImagem.src =
-      "image/explotion-explode.gif";
-    efeitoImagem.alt = "Explosão de Bomba";
-  } else if (tipo === "serpentinas") {
-    efeitoImagem.src =
-      "image/91bbe84aa20c485badf80c055c0dfe3c.gif";
-    efeitoImagem.alt = "Serpentinas";
+// Inicializa o tabuleiro
+function initBoard() {
+  elements.gameBoard.innerHTML = "";
+  for (let i = 0; i < config.totalCards; i++) {
+    elements.gameBoard.innerHTML += `
+      <div class="col-md-4 col-sm-6 col-8">
+        <div id="card-${i}" class="card card-cell inicial" onclick="checkCard(this)">
+          <div class="card-body d-flex justify-content-center align-items-center">
+            <span class="display-1 card-number">${i}</span>
+          </div>
+        </div>
+      </div>
+    `;
   }
-  // Esconder o efeito após a animação
+}
+
+// Mostra efeito visual modificado para tela cheia
+function showEffect(type) {
+  // Resetar animação
+  elements.effectImg.style.animation = 'none';
+  void elements.effectImg.offsetWidth;
+  
+  // Configurar a imagem e classe de efeito
+  elements.effectImg.src = config.images[type === 'bomb' ? 'bomb' : 'confetti'];
+  elements.effectImg.alt = type === 'bomb' ? 'Explosão' : 'Serpentinas';
+  elements.effectImg.className = type === 'bomb' ? 'bomb-effect' : 'confetti-effect';
+  
+  // Mostrar o efeito
+  elements.effect.classList.remove('d-none');
+  
+  // Esconder após a animação
   setTimeout(() => {
-    efeitoDiv.classList.add("d-none");
-  }, 1000); // Duração da animação (1 segundo)
-}
-
-// Função para reiniciar o jogo completamente
-function reiniciar() {
-  desempenho = 0;
-  tentativas = 0;
-  acertos = 0;
-  jogar = true;
-  jogarNovamente();
-  atualizaPlacar(0, 0);
-  btnJogarNovamente.classList.remove("d-none");
-  btnReiniciar.classList.add("d-none");
-}
-
-// Função para jogar novamente (mantém o placar)
-function jogarNovamente() {
-  jogar = true;
-
-  // Resetar as células
-  document.querySelectorAll(".card-cell").forEach((cell) => {
-    cell.className = "card card-cell inicial";
-    const img = cell.querySelector("img");
-    if (img) img.remove();
-
-    // Mostrar o número novamente
-    const numberSpan = cell.querySelector(".card-number");
-    numberSpan.classList.remove("hidden-number");
-  });
+    elements.effect.classList.add('d-none');
+  }, 1000);
 }
 
 // Atualiza o placar
-function atualizaPlacar(acertos, tentativas) {
-  desempenho = tentativas > 0 ? (acertos / tentativas) * 100 : 0;
-  document.getElementById("resposta").innerHTML = `
-    Placar - Acertos: <span class="text-success">${acertos}</span> | 
-    Tentativas: <span class="text-primary">${tentativas}</span> | 
-    Desempenho: <span class="fw-bold">${Math.round(desempenho)}%</span>
+function updateScore() {
+  const performance =
+    state.attempts > 0 ? Math.round((state.hits / state.attempts) * 100) : 0;
+
+  elements.response.innerHTML = `
+    Placar - Acertos: <span class="text-success">${state.hits}</span> | 
+    Tentativas: <span class="text-primary">${state.attempts}</span> | 
+    Desempenho: <span class="fw-bold">${performance}%</span>
   `;
 
-  // Verificar desempenho para efeitos
-  if (tentativas >= 1) {
-    // Só mostrar efeitos após pelo menos uma tentativa
-    if (Math.round(desempenho) === 0) {
-      mostrarEfeito("bomba");
-    } else if (Math.round(desempenho) === 100) {
-      mostrarEfeito("serpentinas");
-    }
+  if (state.attempts > 0) {
+    if (performance === 0) showEffect("bomb");
+    if (performance === 100) showEffect("confetti");
   }
 }
 
-// Função chamada quando o jogador acerta
-function acertou(obj) {
-  obj.classList.remove("inicial");
-  obj.classList.add("acertou");
+// Lógica do jogo
+function checkCard(card) {
+  if (!state.isPlaying)
+    return alert('Clique em "Jogar novamente" para continuar');
 
-  // Esconder o número
-  const numberSpan = obj.querySelector(".card-number");
-  numberSpan.classList.add("hidden-number");
+  state.isPlaying = false;
+  state.attempts++;
+
+  const randomCard = Math.floor(Math.random() * config.totalCards);
+  const isCorrect = card.id === `card-${randomCard}`;
+
+  if (isCorrect) state.hits++;
+
+  updateCard(card, isCorrect);
+  updateCard(document.getElementById(`card-${randomCard}`), true);
+
+  updateScore();
+  toggleButtons();
+}
+
+// Atualiza visual da carta
+function updateCard(card, isCorrect) {
+  card.classList.remove("inicial");
+  card.classList.add(isCorrect ? "acertou" : "errou");
+
+  const number = card.querySelector(".card-number");
+  number.classList.add("hidden-number");
 
   const img = new Image();
-  img.id = "imagem";
-  img.src =
-    "https://upload.wikimedia.org/wikipedia/commons/2/2e/Oxygen480-emotes-face-smile-big.svg";
-  img.alt = "Smile";
-  img.classList.add("img-fluid");
+  img.src = isCorrect ? config.images.smile : config.images.sad;
+  img.alt = isCorrect ? "Smile" : "Sad";
+  img.classList.add("img-fluid", "card-img");
 
-  const cardBody = obj.querySelector(".card-body");
-  cardBody.appendChild(img);
+  card.querySelector(".card-body").appendChild(img);
 }
 
-// Função chamada quando o jogador erra
-function errou(obj) {
-  obj.classList.remove("inicial");
-  obj.classList.add("errou");
-
-  // Esconder o número
-  const numberSpan = obj.querySelector(".card-number");
-  numberSpan.classList.add("hidden-number");
-
-  const img = new Image();
-  img.id = "imagem";
-  img.src =
-    "https://png.pngtree.com/png-vector/20221110/ourmid/pngtree-yellow-sad-emoji-design-with-big-glassy-eyes-png-image_6432751.png";
-  img.alt = "Sad Face";
-  img.classList.add("img-fluid");
-
-  const cardBody = obj.querySelector(".card-body");
-  cardBody.appendChild(img);
+// Controle de botões
+function toggleButtons() {
+  elements.btnPlayAgain.classList.toggle("d-none", state.attempts > 0);
+  elements.btnRestart.classList.toggle("d-none", state.attempts === 0);
 }
 
-// Função principal que verifica a jogada
-function verifica(obj) {
-  if (!jogar) {
-    alert('Clique em "Jogar novamente" para continuar');
-    return;
-  }
-
-  jogar = false;
-  tentativas++;
-
-  if (tentativas === 1) {
-    btnJogarNovamente.classList.add("d-none");
-    btnReiniciar.classList.remove("d-none");
-  }
-
-  const sorteado = Math.floor(Math.random() * 6); // 6 cartas (0 a 5)
-
-  if (obj.id == sorteado) {
-    acertou(obj);
-    acertos++;
-  } else {
-    errou(obj);
-    const objSorteado = document.getElementById(sorteado);
-    acertou(objSorteado);
-  }
-
-  atualizaPlacar(acertos, tentativas);
+// Reinicia o jogo
+function resetGame() {
+  state.score = state.attempts = state.hits = 0;
+  state.isPlaying = true;
+  initBoard();
+  updateScore();
+  toggleButtons();
 }
 
-// Event listeners
-btnJogarNovamente.addEventListener("click", jogarNovamente);
-btnReiniciar.addEventListener("click", reiniciar);
-
-// Atualizar ano automaticamente
-document.getElementById("ano-atual").textContent = new Date().getFullYear();
+// Inicialização
+document.addEventListener("DOMContentLoaded", () => {
+  initBoard();
+  elements.btnPlayAgain.addEventListener("click", () => {
+    state.isPlaying = true;
+    initBoard();
+  });
+  elements.btnRestart.addEventListener("click", resetGame);
+});
